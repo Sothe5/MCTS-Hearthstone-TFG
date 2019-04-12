@@ -25,27 +25,36 @@ namespace SabberStoneCoreAi.Agent
 
 		public override void InitializeGame() { }
 
-
-		public override PlayerTask GetMove(SabberStoneCoreAi.POGame.POGame poGame)
+		public AlvaroAgent() // aqui es donde pones los parametros y tal 
 		{
-			foreach (PlayerTask a in poGame.CurrentPlayer.Options()){
-				Console.WriteLine(a + "----------------------");
-			}
 
+		}
+
+
+		public override PlayerTask GetMove(POGame.POGame poGame)
+		{
+			//foreach (PlayerTask a in poGame.CurrentPlayer.Options()){
+			//	Console.WriteLine(a + "----------------------");
+			//}
+			POGame.POGame initialState = new POGame.POGame(poGame.getGame, false);
 			Node root = new Node();
 			Node selectedNode;
-			InitializeRoot(root, poGame);
+			Node nodeToSimulate;
+			InitializeRoot(root, initialState);
 			
 			int iterations = 0;
 
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
-			
-			while (stopwatch.ElapsedMilliseconds <= MAX_TIME)
+			while (stopwatch.ElapsedMilliseconds <= MAX_TIME) // Hay que poner por algun lado de aqui que si solo hay una opcion que no piense
 			{
-				selectedNode = Selection(root, iterations);
-				//Console.WriteLine(stopwatch.ElapsedMilliseconds);
+				poGame = initialState;
 
+				selectedNode = Selection(root, iterations, ref poGame);
+
+				nodeToSimulate = Expansion(selectedNode, poGame);
+
+				//Console.WriteLine(stopwatch.ElapsedMilliseconds);
 				iterations++;
 			}
 			stopwatch.Stop();
@@ -53,7 +62,7 @@ namespace SabberStoneCoreAi.Agent
 			return bestTaskOption(root);
 		}
 
-		private void InitializeRoot(Node root, SabberStoneCoreAi.POGame.POGame poGame)
+		private void InitializeRoot(Node root, POGame.POGame poGame)
 		{
 			foreach (PlayerTask task in poGame.CurrentPlayer.Options())
 			{
@@ -75,12 +84,12 @@ namespace SabberStoneCoreAi.Agent
 			return bestTask;
 		}
 
-		private Node Selection(Node root, int iterations)
+		private Node Selection(Node root, int iterations, ref POGame.POGame poGame)
 		{
 			Node bestNode = new Node();
 			double bestScore = -1;
 			double childScore = 0;
-
+			
 			foreach (Node node in root.children)
 			{
 				childScore = ucb1(node, iterations);
@@ -90,34 +99,59 @@ namespace SabberStoneCoreAi.Agent
 					bestNode = node;
 				}
 			}
-
+			List<PlayerTask> taskToSimulate = new List<PlayerTask>();
+			taskToSimulate.Add(bestNode.task);
+			
+			foreach (POGame.POGame state in poGame.Simulate(taskToSimulate).Values)
+			{
+				poGame = state;
+			}
+			
 			if(bestNode.children.Count != 0)
 			{
-				bestNode = Selection(bestNode,iterations);
+				Console.WriteLine("recursion ");
+				bestNode = Selection(bestNode,iterations, ref poGame);
 			}
 
 			return bestNode;
 		}
 
-		//  vi = media de valores					|| ni = Veces visitado		|| N = numero de veces que se realiza una seleccion  || C = entre [2 - 0]
+		//  vi = media de valores					|| ni = Veces visitado		|| N = numero de veces que se realiza una seleccion  || C = entre [0 - 2]
 		//  vi = totalValores / Veces visitado		||							|| (Sin contar en la que estas)						 || empírico
 		// UCB1(Si) = vi + C * sqrt(ln(N)/ni) value.
 		private double ucb1(Node node, int iterations)
 		{
-			double aux = Double.PositiveInfinity;
+			double value;
 			if(node.timesVisited > 0)
-				aux = EXPLORE_CONSTANT * Math.Sqrt(Math.Log(iterations) / node.timesVisited);
-			return (node.totalValue / (double)node.timesVisited) + aux;
+			{
+				value = (node.totalValue / (double)node.timesVisited) + EXPLORE_CONSTANT * Math.Sqrt(Math.Log(iterations) / node.timesVisited);
+			} else
+			{
+				value = Double.MaxValue;
+			}
+			return value;
 		}
 
 
 		// Depende del turno crea nodos de un tipo o de otro. 
-		// Actualizar leafs
-		// Cuando se seleccione EndTurnTask se tendra que cambiar el turno.
-		// Se salta si timesVisited es 0.
-		private void Expansion()
-		{
+		// Cuando se seleccione EndTurnTask se tendra que cambiar el turno.		AUTO
 
+		private Node Expansion(Node leaf, POGame.POGame poGame)
+		{
+			Node nodeToSimulate;
+
+			if (leaf.timesVisited == 0)
+			{
+				nodeToSimulate = leaf;
+			} else
+			{
+				foreach (PlayerTask task in poGame.CurrentPlayer.Options())
+				{
+					leaf.children.Add(new Node(task, leaf));
+				}
+				nodeToSimulate = leaf.children[0];
+			}
+			return nodeToSimulate;
 		}
 
 

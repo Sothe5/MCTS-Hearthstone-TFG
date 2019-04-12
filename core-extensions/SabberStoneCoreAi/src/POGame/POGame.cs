@@ -129,7 +129,7 @@ namespace SabberStoneCoreAi.POGame
 				try
 				{
 					clone.Process(task);
-					simulated.Add(task, new POGame(clone, this.debug));
+					simulated.Add(task, new POGame(clone, false));
 				}
 				catch (Exception)
 				{
@@ -194,6 +194,12 @@ namespace SabberStoneCoreAi.POGame
 		{
 			get { return game[GameTag.TURN]; }
 		}
+
+		public Game getGame
+		{
+			get { return origGame; }
+		}
+
 
 		/// <summary>
 		/// Gets or sets the game state.

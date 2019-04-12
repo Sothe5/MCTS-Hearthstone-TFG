@@ -12,10 +12,9 @@ namespace SabberStoneCoreAi
 
 		private static void Main(string[] args)
 		{
-			
+			//Console.WriteLine(args.Length);
 			Console.WriteLine("Setup gameConfig");
 
-			//todo: rename to Main
 			GameConfig gameConfig = new GameConfig
 			{
 				StartPlayer = 1,
@@ -25,6 +24,9 @@ namespace SabberStoneCoreAi
 				Logging = false,
 				FillDecksPredictably = false
 			};
+			//System.Collections.Generic.List<SabberStoneCore.Model.Card> list = new System.Collections.Generic.List<SabberStoneCore.Model.Card>();
+			//list.Add(SabberStoneCore.Model.Cards.FromName("Haunted Creeper"));
+			//gameConfig.Player1Deck = list;
 
 			Console.WriteLine("Setup POGameHandler");
 			AbstractAgent player1 = new AlvaroAgent();
@@ -32,7 +34,7 @@ namespace SabberStoneCoreAi
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:true);
 
 			Console.WriteLine("PlayGame");
-			//gameHandler.PlayGame();
+
 			gameHandler.PlayGames(1);
 			GameStats gameStats = gameHandler.getGameStats();
 
@@ -75,7 +77,17 @@ namespace SabberStoneCoreAi
  *	aunqu si llega al final tiene que ser 0 o 1
  *
  * args
- * 
+ *
+ *
+ *	=================================================================================
+ *	Concepto teorico:
+ *		Porque cojones vas a priorizar explorar por donde el jugador 2 tiende a perder, no es realista creer que el jugador 2 va a elegir
+ *		la peor opcion. No deberia cambiarse para que fuera justo al reves que se prioricen como exploraciones en las que asumes
+ *		que el oponente es bueno y no como ahora que se asume que es malo.???
+ *
+ *	Ahora mismo se hace de esa manera en parte supongo que asumiendo que como no sabes que va a hacer el oponente te da igual que hacer en
+ *	esos puntos.  MAYBE : podria ser un parametro el metodo de seleccion de nodos para cuando es un oponente.
+ *	https://www.youtube.com/watch?v=xmImNoDc9Z4&list=WL&index=172  min 29
  */
 
 
