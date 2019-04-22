@@ -39,7 +39,8 @@ namespace SabberStoneCoreAi.Agent
 			POGame.POGame initialState = new POGame.POGame(poGame.getGame, false);
 			Node root = new Node();
 			Node selectedNode;
-			Node nodeToSimulate;
+			Node nodeExpanded;
+			float scoreOfSimulation;
 			InitializeRoot(root, initialState);
 			
 			int iterations = 0;
@@ -49,10 +50,12 @@ namespace SabberStoneCoreAi.Agent
 			while (stopwatch.ElapsedMilliseconds <= MAX_TIME) // Hay que poner por algun lado de aqui que si solo hay una opcion que no piense
 			{
 				poGame = initialState;
-
+	
 				selectedNode = Selection(root, iterations, ref poGame);
 
-				nodeToSimulate = Expansion(selectedNode, poGame);
+				nodeExpanded = Expansion(selectedNode, ref poGame);
+
+				scoreOfSimulation = Simulation(poGame);
 
 				//Console.WriteLine(stopwatch.ElapsedMilliseconds);
 				iterations++;
@@ -101,11 +104,13 @@ namespace SabberStoneCoreAi.Agent
 			}
 			List<PlayerTask> taskToSimulate = new List<PlayerTask>();
 			taskToSimulate.Add(bestNode.task);
-			
-			foreach (POGame.POGame state in poGame.Simulate(taskToSimulate).Values)
-			{
-				poGame = state;
-			}
+
+			poGame = poGame.Simulate(taskToSimulate)[bestNode.task];
+
+			//foreach (POGame.POGame state in poGame.Simulate(taskToSimulate).Values)
+			//{
+			//	poGame = state;
+			//}
 			
 			if(bestNode.children.Count != 0)
 			{
@@ -136,7 +141,7 @@ namespace SabberStoneCoreAi.Agent
 		// Depende del turno crea nodos de un tipo o de otro. 
 		// Cuando se seleccione EndTurnTask se tendra que cambiar el turno.		AUTO
 
-		private Node Expansion(Node leaf, POGame.POGame poGame)
+		private Node Expansion(Node leaf, ref POGame.POGame poGame)
 		{
 			Node nodeToSimulate;
 
@@ -149,16 +154,49 @@ namespace SabberStoneCoreAi.Agent
 				{
 					leaf.children.Add(new Node(task, leaf));
 				}
-				nodeToSimulate = leaf.children[0];
+
+				nodeToSimulate = leaf.children[0]; 
+				List<PlayerTask> taskToSimulate = new List<PlayerTask>();
+				taskToSimulate.Add(nodeToSimulate.task);
+				poGame = poGame.Simulate(taskToSimulate)[nodeToSimulate.task];
+				taskToSimulate.Clear();
 			}
 			return nodeToSimulate;
 		}
 
-
-
-		private void Simulation()
+		// me dan un nodo y yo simulo "hasta el final" y devuelvo un float que si llega al final sera 1 o 0 y sino llega tendre que hacer prediccion
+		private float Simulation(POGame.POGame poGame)
 		{
+			float result = -1;
 
+			List<PlayerTask> taskToSimulate = new List<PlayerTask>();
+
+			while (poGame.getGame.State != SabberStoneCore.Enums.State.COMPLETE)
+			{
+				taskToSimulate.Add(poGame.CurrentPlayer.Options()[Rnd.Next(0, poGame.CurrentPlayer.Options().Count-1)]);
+				poGame = poGame.Simulate(taskToSimulate)[taskToSimulate[0]];
+				taskToSimulate.Clear();
+			}
+
+			SabberStoneCore.Model.Entities.Controller myPlayer;
+			if(poGame.getGame.CurrentPlayer.PlayerId == 1)
+			{
+				myPlayer = poGame.getGame.CurrentPlayer;
+			} else
+			{
+				myPlayer = poGame.getGame.CurrentOpponent;
+			}
+
+			if (myPlayer.PlayState == SabberStoneCore.Enums.PlayState.CONCEDED
+				|| myPlayer.PlayState == SabberStoneCore.Enums.PlayState.LOST)
+			{
+				result = 0;
+			} else if (myPlayer.PlayState == SabberStoneCore.Enums.PlayState.WON)
+			{
+				result = 1;
+			}
+
+			return result;
 		}
 
 		// iterate over the tree until parent == null sumando puntuaciones a los dos campos del nodo.

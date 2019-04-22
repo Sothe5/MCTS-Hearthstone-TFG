@@ -63,8 +63,8 @@ namespace SabberStoneCoreAi.POGame
 					poGame = new POGame(game, debug);
 
 					currentStopwatch.Start(); 
-					playertask = currentAgent.GetMove(poGame); // probablemente con una lista y un for en el process puedas
-					currentStopwatch.Stop();                   //  hacer mas de una accion por turno
+					playertask = currentAgent.GetMove(poGame);
+					currentStopwatch.Stop();                  
 
 					game.CurrentPlayer.Game = game;
 					game.CurrentOpponent.Game = game;
