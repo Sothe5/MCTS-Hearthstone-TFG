@@ -10,27 +10,27 @@ namespace SabberStoneCoreAi.Agent
 	{
 		public override void InitializeAgent()
 		{
-			throw new NotImplementedException();
+		
 		}
 
 		public override void InitializeGame()
 		{
-			throw new NotImplementedException();
+
 		}
 
 		public override PlayerTask GetMove(POGame.POGame poGame)
 		{
-			throw new NotImplementedException();
+			return poGame.CurrentPlayer.Options()[0];
 		}
 
 		public override void FinalizeGame()
 		{
-			throw new NotImplementedException();
+
 		}
 
 		public override void FinalizeAgent()
 		{
-			throw new NotImplementedException();
+	
 		}
 	}
 }

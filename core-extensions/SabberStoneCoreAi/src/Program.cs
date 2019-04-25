@@ -4,6 +4,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
+using SabberStoneCoreAi.src.Agent.AlvaroMCTS;
 
 namespace SabberStoneCoreAi
 {
@@ -18,24 +19,27 @@ namespace SabberStoneCoreAi
 			GameConfig gameConfig = new GameConfig
 			{
 				StartPlayer = 1,
-				Player1HeroClass = CardClass.HUNTER,
-				Player2HeroClass = CardClass.MAGE,
-				FillDecks = true,
+				Player1HeroClass = CardClass.WARLOCK,
+				Player2HeroClass = CardClass.WARLOCK,
+				FillDecks = false,
 				Logging = false,
-				FillDecksPredictably = false
+				FillDecksPredictably = true
 			};
-			//System.Collections.Generic.List<SabberStoneCore.Model.Card> list = new System.Collections.Generic.List<SabberStoneCore.Model.Card>();
-			//list.Add(SabberStoneCore.Model.Cards.FromName("Haunted Creeper"));
-			//gameConfig.Player1Deck = list;
-
+			/*System.Collections.Generic.List<SabberStoneCore.Model.Card> list = new System.Collections.Generic.List<SabberStoneCore.Model.Card>();	
+			list.Add(SabberStoneCore.Model.Cards.FromName("Haunted Creeper"));
+		*/
+			DeckManager manage = new DeckManager();
+			gameConfig.Player1Deck = manage.NaxxramasWarlock;
+			gameConfig.Player2Deck = manage.NaxxramasWarlock;
+				
 			Console.WriteLine("Setup POGameHandler");
 			AbstractAgent player1 = new AlvaroAgent();
-			AbstractAgent player2 = new FaceHunter();
+			AbstractAgent player2 = new TycheAgentCompetition();
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:true);
 
 			Console.WriteLine("PlayGame");
 
-			gameHandler.PlayGames(1);
+			gameHandler.PlayGames(10);
 			GameStats gameStats = gameHandler.getGameStats();
 
 			gameStats.printResults();

@@ -7,7 +7,7 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 {
 	class Node
 	{
-		public int totalValue	{ get; set; } // de que gana el jugador 1.
+		public float totalValue	{ get; set; } // de que gana el jugador 1.
 		public int timesVisited { get; set; }
 		public Node parent		{ get; set; }
 		public PlayerTask task	{ get; set; }
