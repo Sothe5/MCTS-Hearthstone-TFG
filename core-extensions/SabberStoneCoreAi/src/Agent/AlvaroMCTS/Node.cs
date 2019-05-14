@@ -12,10 +12,7 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		public Node parent		{ get; set; }
 		public PlayerTask task	{ get; set; }
 		public List<Node> children;
-
-		// QUIZAS añadir un campo para guardar: de que jugador es el nodo que posee la opcion y se setearia en expansion
-		// y en la inicializacion.
-		// En la approach base no es necesario pero en otras puede que si.
+		public bool isPlayer1Node { get; set; }
 
 
 		public Node()
@@ -25,15 +22,17 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			parent = null;
 			task = null;
 			children = new List<Node>();
+			isPlayer1Node = false;
 		}
 
-		public Node(PlayerTask task, Node parent)
+		public Node(PlayerTask task, Node parent, bool isPlayer1Node)
 		{
 			totalValue = 0;
 			timesVisited = 0;
 			this.parent = parent;
 			this.task = task;
 			children = new List<Node>();
+			this.isPlayer1Node = isPlayer1Node;
 		}
 
 	}

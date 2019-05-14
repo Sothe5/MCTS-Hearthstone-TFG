@@ -13,8 +13,11 @@ namespace SabberStoneCoreAi.Agent
 	class AlvaroAgent : AbstractAgent
 	{
 		private Random Rnd = new Random();
-		private const int EXPLORE_CONSTANT = 2;
-		private const int MAX_TIME = 10000;
+
+//		======== PARAMETERS ==========
+		private double EXPLORE_CONSTANT = 2;
+		private int MAX_TIME = 10000;
+		private string SELECTION_ACTION = "MaxVictories";
 
 
 		public override void FinalizeAgent() { }
@@ -25,9 +28,13 @@ namespace SabberStoneCoreAi.Agent
 
 		public override void InitializeGame() { }
 
-		public AlvaroAgent() // aqui es donde pones los parametros y tal 
-		{
+		public AlvaroAgent() { }
 
+		public AlvaroAgent(int exploreConstant, int maxTime, string selectionAction) // aqui es donde pones los parametros y tal 
+		{
+			EXPLORE_CONSTANT = exploreConstant;
+			MAX_TIME = maxTime;
+			SELECTION_ACTION = selectionAction;
 		}
 
 
@@ -72,55 +79,65 @@ namespace SabberStoneCoreAi.Agent
 				iterations++;
 			}
 			stopwatch.Stop();
-
-			return bestTaskOption(root);
+			
+			return SelectAction.selectTask(SELECTION_ACTION, root, iterations, EXPLORE_CONSTANT);
 		}
 
 		private void InitializeRoot(Node root, POGame.POGame poGame)
 		{
 			foreach (PlayerTask task in poGame.CurrentPlayer.Options())
 			{
-				root.children.Add(new Node(task,root));
+				root.children.Add(new Node(task,root,true));
 			}
 		}
 
-		private PlayerTask bestTaskOption(Node root)
-		{
-			//PrintTree(root);
-			float best = -1;
-			PlayerTask bestTask = null;
-			foreach(Node child in root.children)
-			{
-				if(child.totalValue >= best){
-					best = child.totalValue;
-					bestTask = child.task;
-				}
-			}
-			return bestTask;
-		}
-
+	 // Plantear cambiar todo el diseño para que el arbol sea solo de mi jugador y que despues de cada accion que haga mi jugador haya
+	 // un metodo para que me de el estado de juego resultante de que mi oponente haga acciones random hasta que me vuelva a tocar.
+	 // de este modo en el backpropagation no se tiene en cuenta el segundo jugador.
 		private Node Selection(Node root, int iterations, ref POGame.POGame poGame)
 		{
 			Node bestNode = new Node();
 			double bestScore = -1;
+			//double worstScore = Double.MaxValue;
 			double childScore = 0;
-			
-			foreach (Node node in root.children)
-			{
-				childScore = ucb1(node, iterations);
-				if (childScore > bestScore)
+
+			POGame.POGame pOGameIfSimulationFail = new POGame.POGame(poGame.getGame.Clone(), false);
+			//if (root.children[0].isPlayer1Node)
+			//{
+				foreach (Node node in root.children)
 				{
-					bestScore = childScore;
-					bestNode = node;
+					childScore = TreePolicies.ucb1(node, iterations, EXPLORE_CONSTANT);
+					if (childScore > bestScore)
+					{
+						bestScore = childScore;
+						bestNode = node;
+					}
+			/*	}
+			} else
+			{
+				foreach (Node node in root.children)
+				{
+					childScore = ucb1(node, iterations);
+					if (childScore < worstScore)				// menor probabilidad de que gane el jugador 1
+					{
+						worstScore = childScore;
+						bestNode = node;
+					}
 				}
-			}
+			*/}
+			
 			List<PlayerTask> taskToSimulate = new List<PlayerTask>();
 			taskToSimulate.Add(bestNode.task);
 
 			poGame = poGame.Simulate(taskToSimulate)[bestNode.task];
 
-			if (poGame == null)
-				return root;
+			// Simulate have failed
+			if (poGame == null) 
+			{
+				root.children.Remove(bestNode);
+				poGame = pOGameIfSimulationFail;
+				return Selection(root,iterations, ref poGame);
+			}
 			
 			if(bestNode.children.Count != 0)
 			{
@@ -130,22 +147,6 @@ namespace SabberStoneCoreAi.Agent
 			return bestNode;
 		}
 
-		//  vi = media de valores					|| ni = Veces visitado		|| N = numero de veces que se realiza una seleccion  || C = entre [0 - 2]
-		//  vi = totalValores / Veces visitado		||							|| (Sin contar en la que estas)						 || empírico
-		// UCB1(Si) = vi + C * sqrt(ln(N)/ni) value.
-		private double ucb1(Node node, int iterations)
-		{
-			double value;
-			if(node.timesVisited > 0)
-			{
-				value = (node.totalValue / (double)node.timesVisited) + EXPLORE_CONSTANT * Math.Sqrt(Math.Log(iterations) / node.timesVisited);
-			} else
-			{
-				value = Double.MaxValue;
-			}
-			return value;
-		}
-
 
 		// Depende del turno crea nodos de un tipo o de otro. 
 		// Cuando se seleccione EndTurnTask se tendra que cambiar el turno.		AUTO
@@ -153,17 +154,18 @@ namespace SabberStoneCoreAi.Agent
 		private Node Expansion(Node leaf, ref POGame.POGame poGame)
 		{
 			Node nodeToSimulate;
-
+			POGame.POGame pOGameIfSimulationFail = new POGame.POGame(poGame.getGame.Clone(), false);
 			if (leaf.timesVisited == 0)
 			{
 				nodeToSimulate = leaf;
 			} else
 			{
-				if (poGame == null)
-					return leaf;
+				//if (poGame == null)
+				//	return leaf;
+
 				foreach (PlayerTask task in poGame.CurrentPlayer.Options())
 				{
-					leaf.children.Add(new Node(task, leaf));
+					leaf.children.Add(new Node(task, leaf, poGame.getGame.CurrentPlayer.PlayerId == 1));
 
 				}
 
@@ -171,13 +173,20 @@ namespace SabberStoneCoreAi.Agent
 				List<PlayerTask> taskToSimulate = new List<PlayerTask>();
 				taskToSimulate.Add(nodeToSimulate.task);
 				poGame = poGame.Simulate(taskToSimulate)[nodeToSimulate.task];
-				if (poGame == null)
-					return leaf;
-				taskToSimulate.Clear();
+				
+				while(poGame == null && leaf.children.Count != 0)
+				{
+					poGame = pOGameIfSimulationFail;
+					taskToSimulate.Clear();
+					leaf.children.Remove(leaf.children[0]);
+					nodeToSimulate = leaf.children[0];
+					taskToSimulate.Add(nodeToSimulate.task);
+					poGame = poGame.Simulate(taskToSimulate)[nodeToSimulate.task];
+				}	
 			}
 			return nodeToSimulate;
 		}
-
+		
 		// me dan un nodo y yo simulo "hasta el final" y devuelvo un float que si llega al final sera 1 o 0 y sino llega tendre que hacer prediccion
 		private float Simulation(POGame.POGame poGame)
 		{
