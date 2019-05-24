@@ -1,11 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SabberStoneCore.Tasks;
 
 namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 {
 	class TreePolicies
 	{
+
+		public static double selectTreePolicy(string treePolicy, Node node, int iterations, double exploreConstant, ref POGame.POGame poGame,
+			double scoreImportance, ParametricGreedyAgent greedyAgent)
+		{
+			double score;
+			switch (treePolicy)
+			{
+				case "UCB1":
+					score = ucb1(node,iterations,exploreConstant);
+					break;
+				case "UCB1Heuristic":
+					score = ucb1Heuristic(node, iterations, exploreConstant, ref poGame, scoreImportance, greedyAgent);
+					break;
+				default:
+					score = 0;
+					break;
+			}
+
+			return score;
+		}
+
 
 		//  vi = media de valores					|| ni = Veces visitado		|| N = numero de veces que se realiza una seleccion  || C = entre [0 - 2]
 		//  vi = totalValores / Veces visitado		||							|| (Sin contar en la que estas)						 || empírico
@@ -23,5 +45,30 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			return value;
 		}
 
+		// PROBLEMAS: falta los pesos que parece que hay que llamar a un metodo "setAgentWeights()". que definen la importancia de cada cosa.
+		// que podrian ser parametros del ejercicio o pedidos a cotutor.
+		// de todos modo tambien necesito pesos para el estado global dado un solo poGame que tampoco se si inventarme o darlo como parametros.
+
+		// heuristic once
+		public static double ucb1Heuristic(Node node, int iterations, double EXPLORE_CONSTANT, ref POGame.POGame poGame, double SCORE_IMPORTANCE, ParametricGreedyAgent greedyAgent)
+		{
+			double value;
+			if (node.timesVisited > 0)
+			{
+				List<PlayerTask> taskToSimulate = new List<PlayerTask>();
+				taskToSimulate.Add(node.task);
+
+				POGame.POGame stateAfterSimulate = poGame.Simulate(taskToSimulate)[node.task];
+
+				double score = greedyAgent.scoreTask(poGame, stateAfterSimulate);
+				value = (node.totalValue / (double)node.timesVisited) + EXPLORE_CONSTANT * Math.Sqrt(Math.Log(iterations) / node.timesVisited) + SCORE_IMPORTANCE * (score/(double)node.timesVisited);
+			} else
+			{
+				value = Double.MaxValue;
+			}
+			return value;
+		}
+
+		// heuristic 1 for each possibility if possible and then / by total.
 	}
 }
