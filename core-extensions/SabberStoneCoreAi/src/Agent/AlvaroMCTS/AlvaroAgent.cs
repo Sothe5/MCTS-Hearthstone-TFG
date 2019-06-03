@@ -24,6 +24,8 @@ namespace SabberStoneCoreAi.Agent
 		private int MAX_SIMULATION_STEPS = 30;
 		private string SIMULATION_POLICY = "RandomPolicy";
 		private double CHILDREN_CONSIDERED_SIMULATING = 1;
+		private string ESTIMATION_MODE = "BaseEstimation";
+		private int NUM_SIMULATIONS = 1;
 
 
 		public override void FinalizeAgent() { }
@@ -37,11 +39,16 @@ namespace SabberStoneCoreAi.Agent
 		public AlvaroAgent() { }
 
 		public AlvaroAgent(double exploreConstant, int maxTime, string selectionAction, double scoreImportance, string treePolicy, int treeMaximumDepth,
-						   int maxSimulationSteps, string simulationPolicy, double childrenConsideredSimulating, string HERO_HEALTH_REDUCED, string HERO_ATTACK_REDUCED, string MINION_HEALTH_REDUCED, string MINION_ATTACK_REDUCED,
+						   int maxSimulationSteps, string simulationPolicy, double childrenConsideredSimulating, string estimationMode, int numSimulations,
+
+						   string HERO_HEALTH_REDUCED, string HERO_ATTACK_REDUCED, string MINION_HEALTH_REDUCED, string MINION_ATTACK_REDUCED,
 							string MINION_APPEARED, string MINION_KILLED, string SECRET_REMOVED, string MANA_REDUCED, string M_HEALTH,
 							 string M_ATTACK, string M_HAS_CHARGE, string M_HAS_DEAHTRATTLE, string M_HAS_DIVINE_SHIELD, string M_HAS_INSPIRE,
 							  string M_HAS_LIFE_STEAL, string M_HAS_STEALTH, string M_HAS_TAUNT, string M_HAS_WINDFURY, string M_RARITY, string M_MANA_COST,
-							  string M_POISONOUS)
+							  string M_POISONOUS,
+
+							  float weaponAttack, float weaponDurability, float health, float boardStats, float handSize, float deckRemaining,
+							  float mana, float secret, float minionCost, float secretCost, float cardCost, float weaponCost)
 		{
 			EXPLORE_CONSTANT = exploreConstant;
 			MAX_TIME = maxTime;
@@ -52,22 +59,22 @@ namespace SabberStoneCoreAi.Agent
 			MAX_SIMULATION_STEPS = maxSimulationSteps;
 			SIMULATION_POLICY = simulationPolicy;
 			CHILDREN_CONSIDERED_SIMULATING = childrenConsideredSimulating;
+			ESTIMATION_MODE = estimationMode;
+			NUM_SIMULATIONS = numSimulations;
 
 			greedyAgent = new ParametricGreedyAgent();
 			greedyAgent.setAgeintWeightsFromString(HERO_HEALTH_REDUCED+"#"+ HERO_ATTACK_REDUCED + "#" + MINION_HEALTH_REDUCED + "#" + MINION_ATTACK_REDUCED + "#" +
 				MINION_APPEARED + "#" + MINION_KILLED + "#" + SECRET_REMOVED + "#" + MANA_REDUCED + "#" + M_HEALTH + "#" +
 				M_ATTACK + "#" + M_HAS_CHARGE + "#" + M_HAS_DEAHTRATTLE + "#" + M_HAS_DIVINE_SHIELD + "#" + M_HAS_INSPIRE + "#" +
 				M_HAS_LIFE_STEAL + "#" + M_HAS_STEALTH + "#" + M_HAS_TAUNT + "#" + M_HAS_WINDFURY + "#" + M_RARITY + "#" + M_MANA_COST + "#" + M_POISONOUS);
+
+			Estimator.setWeights(weaponAttack, weaponDurability, health, boardStats, handSize, deckRemaining, mana, secret, minionCost, secretCost,
+				cardCost, weaponCost);
 		}
 
 
 		public override PlayerTask GetMove(POGame.POGame poGame)
 		{
-			//foreach (PlayerTask a in poGame.CurrentPlayer.Options()){
-			//	Console.WriteLine(a + "----------------------");
-			//}
-			//POGame.POGame initialState = new POGame.POGame(poGame.getGame, false);
-
 			if(poGame.CurrentPlayer.Options().Count == 1)
 			{
 				return poGame.CurrentPlayer.Options()[0];
@@ -94,12 +101,15 @@ namespace SabberStoneCoreAi.Agent
 				//Console.WriteLine("Selection done");
 				nodeToSimulate = Expansion(selectedNode, ref poGame);
 				//Console.WriteLine("Expansion done");
-				scoreOfSimulation = Simulation(poGame);
-				//Console.WriteLine("Simulation done");
-				Backpropagation(nodeToSimulate, scoreOfSimulation);
-				//Console.WriteLine("Backpropagation done");
+				for(int i = 0; i < NUM_SIMULATIONS; i++)
+				{
+					scoreOfSimulation = Simulation(poGame);
+					//Console.WriteLine("Simulation done");
+					Backpropagation(nodeToSimulate, scoreOfSimulation);
+					//Console.WriteLine("Backpropagation done");
+					iterations++;
+				}
 				//Console.WriteLine(stopwatch.ElapsedMilliseconds);
-				iterations++;
 			}
 			stopwatch.Stop();
 			//PrintTree(root);
@@ -231,19 +241,12 @@ namespace SabberStoneCoreAi.Agent
 
 				if(simulationSteps >= MAX_SIMULATION_STEPS)
 				{
-					return 0.5f; // TODO: Estimation(poGame). 
+					return Estimator.estimateFromState(ESTIMATION_MODE, poGame);
 				}
 				simulationSteps++;
 			}
 
-			SabberStoneCore.Model.Entities.Controller Player1;
-			if(poGame.getGame.CurrentPlayer.PlayerId == 1)
-			{
-				Player1 = poGame.getGame.CurrentPlayer;
-			} else
-			{
-				Player1 = poGame.getGame.CurrentOpponent;
-			}
+			SabberStoneCore.Model.Entities.Controller Player1 = poGame.FirstPlayer;
 
 			if (Player1.PlayState == SabberStoneCore.Enums.PlayState.CONCEDED
 				|| Player1.PlayState == SabberStoneCore.Enums.PlayState.LOST)
