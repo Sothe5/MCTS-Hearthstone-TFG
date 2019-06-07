@@ -130,11 +130,11 @@ namespace SabberStoneCoreAi.POGame
 				{
 					clone.Process(task);
 					simulated.Add(task, new POGame(clone, false));
-				}
-				catch (Exception)
+				} catch (Exception)
 				{
 					simulated.Add(task, null);
 				}
+				
 			}
 			return simulated;
 

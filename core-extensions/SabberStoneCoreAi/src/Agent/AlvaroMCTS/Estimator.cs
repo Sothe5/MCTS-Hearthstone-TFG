@@ -15,6 +15,13 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		private static float DECK_REMAINING_IMPORTANCE = 0;
 		private static float MANA_IMPORTANCE = 0;
 		private static float SECRET_IMPORTANCE = 0;
+		private static float M_HAS_CHARGE = 0;
+		private static float M_HAS_DEAHTRATTLE = 0;
+		private static float M_HAS_DIVINE_SHIELD = 0;
+		private static float M_HAS_INSPIRE = 0;
+		private static float M_HAS_LIFE_STEAL = 0;
+		private static float M_HAS_TAUNT = 0;
+		private static float M_HAS_WINDFURY = 0;
 
 		private static float MINION_COST_IMPORTANCE = 0;
 		private static float SECRET_COST_IMPORTANCE = 0;
@@ -43,7 +50,8 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		}
 
 		static public void setWeights(float weaponAttack, float weaponDurability, float health, float boardStats, float handSize, float deckRemaining,
-			float mana, float secret, float minionCost, float secretCost, float cardCost, float weaponCost)
+			float mana, float secret, float minionCost, float secretCost, float cardCost, float weaponCost, float M_HAS_CHARGE, float M_HAS_DEAHTRATTLE,
+			float M_HAS_DIVINE_SHIELD, float M_HAS_INSPIRE, float M_HAS_LIFE_STEAL, float M_HAS_TAUNT, float M_HAS_WINDFURY)
 		{
 			WEAPON_ATTACK_IMPORTANCE = weaponAttack;
 			WEAPON_DURABILITY_IMPORTANCE = weaponDurability;
@@ -63,21 +71,14 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		static private float baseEstimation(POGame.POGame poGame)
 		{
 			float finalScore = 0.5f;
-			float score1 = calculateScorePlayer(poGame.FirstPlayer);
 
-			Controller player2;
-			if(poGame.CurrentPlayer == poGame.FirstPlayer)
-				player2 = poGame.CurrentOpponent;
-			else
-				player2 = poGame.CurrentPlayer;
-
-			float score2 = calculateScorePlayer(player2);
+			float score1 = calculateScorePlayer(poGame.CurrentOpponent);
+			float score2 = calculateScorePlayer(poGame.CurrentPlayer);
 
 			finalScore = score1 - score2;
 			finalScore = finalScore / Math.Max(score1, score2);
 			finalScore /= 2;
 			finalScore += 0.5f;
-
 			return finalScore;
 		}
 
@@ -85,16 +86,30 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		{
 			float score = 0;
 			float statsOnBoard = 0;
-			foreach(Minion minion in player.BoardZone.GetAll())
+			foreach(Minion m in player.BoardZone.GetAll())
 			{
-				statsOnBoard += minion.Health + minion.AttackDamage;
+				statsOnBoard += m.Health + m.AttackDamage;
+				if (m.HasCharge)
+					score = statsOnBoard + M_HAS_CHARGE;
+				if (m.HasDeathrattle)
+					score = statsOnBoard + M_HAS_DEAHTRATTLE;
+				if (m.HasDivineShield)
+					score = statsOnBoard + M_HAS_DIVINE_SHIELD;
+				if (m.HasInspire)
+					score = statsOnBoard + M_HAS_INSPIRE;
+				if (m.HasLifeSteal)
+					score = statsOnBoard + M_HAS_LIFE_STEAL;
+				if (m.HasTaunt)
+					score = statsOnBoard + M_HAS_TAUNT;
+				if (m.HasWindfury)
+					score = statsOnBoard + M_HAS_WINDFURY;
 			}
 
 			float weaponQuality = 0;
 			if (player.Hero.Weapon != null)
 				 weaponQuality = player.Hero.Weapon.AttackDamage * WEAPON_ATTACK_IMPORTANCE + player.Hero.Weapon.Durability * WEAPON_DURABILITY_IMPORTANCE;
 			
-			score = player.Hero.Health * HEALTH_IMPORTANCE + weaponQuality + statsOnBoard * BOARD_STATS_IMPORTANCE + player.HandZone.Count * HAND_SIZE_IMPORTANCE
+			score = player.Hero.Health * HEALTH_IMPORTANCE + player.Hero.Armor * HEALTH_IMPORTANCE + weaponQuality + statsOnBoard * BOARD_STATS_IMPORTANCE + player.HandZone.Count * HAND_SIZE_IMPORTANCE
 				+ player.DeckZone.Count * DECK_REMAINING_IMPORTANCE + player.BaseMana * MANA_IMPORTANCE + player.SecretZone.Count * SECRET_IMPORTANCE;
 
 			if (score == 0)
@@ -107,15 +122,8 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		{
 			float finalScore = 0.5f;
 
-			float score1 = calculateValuePlayer(poGame.FirstPlayer);
-
-			Controller player2;
-			if (poGame.CurrentPlayer == poGame.FirstPlayer)
-				player2 = poGame.CurrentOpponent;
-			else
-				player2 = poGame.CurrentPlayer;
-
-			float score2 = calculateValuePlayer(player2);
+			float score1 = calculateValuePlayer(poGame.CurrentOpponent);
+			float score2 = calculateValuePlayer(poGame.CurrentPlayer);
 
 			finalScore = score1 - score2;
 			finalScore = finalScore / Math.Max(score1, score2);

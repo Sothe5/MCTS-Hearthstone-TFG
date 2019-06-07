@@ -24,6 +24,9 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 				case "MaxUCB":
 					task = MaxUCB(root, iterations, exploreConstant);
 					break;
+				case "MaxVictoriesOverVisited":
+					task = MaxVictoriesOverVisited(root);
+					break;
 				default:
 					task = null;
 					break;
@@ -84,6 +87,24 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			foreach (Node child in root.children)
 			{
 				double score = TreePolicies.ucb1(root, iterations, exploreConstant);
+				if (score >= best)
+				{
+					best = score;
+					bestTask = child.task;
+				}
+			}
+			return bestTask;
+		}
+
+		private static PlayerTask MaxVictoriesOverVisited(Node root)
+		{
+			double best = -1;
+			PlayerTask bestTask = null;
+			double score = 0;
+			foreach (Node child in root.children)
+			{
+				//Console.WriteLine(child.task + ", " + child.totalValue+", "+ child.timesVisited);
+				score = child.totalValue/ (float)child.timesVisited;
 				if (score >= best)
 				{
 					best = score;

@@ -32,7 +32,7 @@ using System.Text;
 using System.Linq;
 using System.Globalization;
 
-namespace SabberStoneCoreAi.src.Agent
+namespace SabberStoneCoreAi.Agent
 {
 	class ParametricGreedyAgent : AbstractAgent
 	{
@@ -72,6 +72,11 @@ namespace SabberStoneCoreAi.src.Agent
 		public static string M_POISONOUS = "M_POISONOUS";		
 
 		public Dictionary<string, double> weights;
+
+		public ParametricGreedyAgent(string weightsString)
+		{
+			setAgeintWeightsFromString(weightsString);
+		}
 
 
 		public override PlayerTask GetMove(POGame.POGame poGame)

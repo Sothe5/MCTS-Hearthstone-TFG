@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SabberStoneCore.Tasks;
+using SabberStoneCoreAi.Agent;
 
 namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 {
@@ -68,7 +69,5 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			}
 			return value;
 		}
-
-		// heuristic 1 for each possibility if possible and then / by total.
 	}
 }

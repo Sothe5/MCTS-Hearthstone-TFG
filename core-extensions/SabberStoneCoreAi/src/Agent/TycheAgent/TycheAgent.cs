@@ -41,10 +41,12 @@ namespace SabberStoneCoreAi.Agent
 		private int _playerId;
 		public int PlayerId { get { return _playerId; } }
 
-		public TycheAgentCompetition()
+		public double MAX_TIME = 1.0f;
+
+		public TycheAgentCompetition(double time)
 			: this(TyStateWeights.GetDefault(), true, DEFAULT_NUM_EPISODES_MULTIPLIER, true)
-		{		
-			
+		{
+			MAX_TIME = time;
 		}
 		
 
@@ -123,13 +125,24 @@ namespace SabberStoneCoreAi.Agent
 
 			double simStart = TyUtility.GetSecondsSinceStart();
 
-			for (int i = 0; i < numEpisodes; i++)
+			/*
+			 *for (int i = 0; i < numEpisodes; i++)
 			{
 				if (!IsAllowedToSimulate(simStart, i, numEpisodes, optionCount))
 					break;
 
 				bool shouldExploit = ((double)i / (double)numEpisodes) > EXPLORE_TRESHOLD;
 				_simTree.SimulateEpisode(_random, i, shouldExploit);
+			}
+			 *
+			 */
+			int i = 0;
+			while (IsAllowedToSimulate(simStart, i, numEpisodes, optionCount))
+			{ 
+		
+				bool shouldExploit = ((double)i / (double)numEpisodes) > EXPLORE_TRESHOLD;
+				_simTree.SimulateEpisode(_random, i, shouldExploit);
+				i++;
 			}
 
 			var bestNode = _simTree.GetBestNode();
@@ -147,7 +160,7 @@ namespace SabberStoneCoreAi.Agent
 		{
 			double time = TyUtility.GetSecondsSinceStart() - startTime;
 
-			if (time >= TyConst.MAX_SIMULATION_TIME)
+			if (time >= MAX_TIME)
 			{	
 				TyDebug.LogWarning("Stopped simulations after " + time.ToString("0.000") + "s and " + curEpisode + " of " + maxEpisode + " episodes. Having " + options + " options.");
 				return false;

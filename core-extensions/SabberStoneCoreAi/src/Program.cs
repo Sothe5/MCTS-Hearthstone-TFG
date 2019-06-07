@@ -4,7 +4,9 @@ using SabberStoneCore.Enums;
 using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
+using SabberStoneCoreAi.Tournament;
 using SabberStoneCoreAi.src.Agent.AlvaroMCTS;
+using System.Collections.Generic;
 
 namespace SabberStoneCoreAi
 {
@@ -13,50 +15,57 @@ namespace SabberStoneCoreAi
 
 		private static void Main(string[] args)
 		{
-			//Console.WriteLine(args.Length);
 			Console.WriteLine("Setup gameConfig");
 
 			GameConfig gameConfig = new GameConfig
 			{
 				StartPlayer = 1,
-				Player1HeroClass = CardClass.WARLOCK,
-				Player2HeroClass = CardClass.WARLOCK,
+				Player1HeroClass = CardClass.SHAMAN,
+				Player2HeroClass = CardClass.SHAMAN,
 				FillDecks = false,
 				Logging = false,
-				FillDecksPredictably = true
+				FillDecksPredictably = true,
+				History = false
 			};
 		
-			DeckManager manage = new DeckManager();
-			gameConfig.Player1Deck = manage.NaxxramasWarlock;
-			gameConfig.Player2Deck = manage.NaxxramasWarlock;
+			DeckManager manager = new DeckManager();
+			gameConfig.Player1Deck = manager.AggroShaman;
+			gameConfig.Player2Deck = manager.AggroShaman;
 				
 			Console.WriteLine("Setup POGameHandler");
 
-			/* 
-				2,10000,"MaxVictories",1,"UCB1Heuristic",5, 10, "GreedyPolicy", 0.7, "ValueEstimation", 2, "0.569460712743","0.958111820041","0.0689492467097","0.0","0.843573987219",
+			/*
+			 *2 1000 MaxVictories 10 UCB1Heuristic 10 GreedyPolicy 1.0 BaseEstimation 1 0.569460712743 0.958111820041 0.0689492467097
+			 * 0.0 0.843573987219 0.700225423688 0.907680353441 0.0 0.993682660717 1.0 0.640753949511 0.992872512338 0.92870036875 0.168100484322
+			 * 0.870080107454 0.0 0.42897762808 1.0 0.0 0.583884736646 0.0 0.9 0.3 0.15 0.9 0.3 0.05 0.3 0.7 0.8 0.5 0.4 0.5
+			 * 
+			 * Argument of the constructor
+			 * 
+				2,1000,"MaxVictories",10,"UCB1Heuristic", 10, "GreedyPolicy", 0.7, "BaseEstimation", 1, "0.569460712743","0.958111820041","0.0689492467097","0.0","0.843573987219",
 				"0.700225423688","0.907680353441","0.0","0.993682660717","1.0","0.640753949511","0.992872512338","0.92870036875","0.168100484322","0.870080107454",
-													"0.0","0.42897762808","1.0","0.0","0.583884736646","0.0", 0.2f, 0.2f, 0.6f, 0.7f, 0.5f, 0.3f, 0.8f, 0.3f, 0.8f, 0.5f, 0.4f, 0.5f
+													"0.0","0.42897762808","1.0","0.0","0.583884736646","0.0", 0.9f, 0.3f, 0.15f, 0.9f, 0.3f, 0.05f, 0.3f, 0.7f, 0.8f, 0.5f, 0.4f, 0.5f
 			 */
 
 			/*
 			 * Argument style if used in Visual Studio environment
-			 * 2 10000 MaxVictories 1 UCB1Heuristic 5 10 GreedyPolicy 0.7 ValueEstimation 2 0.569460712743 0.958111820041 0.0689492467097 0.0 0.843573987219 0.700225423688 0.907680353441 0.0 0.993682660717 1.0 0.640753949511 0.992872512338 0.92870036875 0.168100484322 0.870080107454 0.0 0.42897762808 1.0 0.0 0.583884736646 0.0 0.2 0.2 0.6 0.7 0.5 0.3 0.8 0.3 0.8 0.5 0.4 0.5
+			 * 
+			 * 2 1000 MaxVictories 1.5 UCB1Heuristic 10 GreedyPolicy 0.7 BaseEstimation 2 0.569460712743 0.958111820041 0.0689492467097 0.0 0.843573987219 0.700225423688 0.907680353441 0.0 0.993682660717 1.0 0.640753949511 0.992872512338 0.92870036875 0.168100484322 0.870080107454 0.0 0.42897762808 1.0 0.0 0.583884736646 0.0 0.9 0.3 0.15 0.9 0.3 0.05 0.3 0.7 0.8 0.5 0.4 0.5
 			 */
 
 
-			AbstractAgent player1 = new AlvaroAgent(Double.Parse(args[0]), Int32.Parse(args[1]), args[2], Double.Parse(args[3]), args[4],
-			   Int32.Parse(args[5]), Int32.Parse(args[6]), args[7], Double.Parse(args[8]), args[9], Int32.Parse(args[10]),
+			AbstractAgent player1 = new AlvaroAgent(2, 1000, "MaxVictoriesOverVisited", 10, "UCB1Heuristic", 10, "GreedyPolicy", 0.7, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.4f, 0.15f, 0.15f, 0.9f, 0.3f, 0.05f, 0.3f, 0.7f, 0.8f, 0.5f, 0.4f, 0.5f);
 
-			   args[11], args[12], args[13], args[14], args[15], args[16], args[17], args[18], args[19], args[20], args[21], args[22],
-			   args[23], args[24], args[25], args[26], args[27], args[28], args[29], args[30], args[31],
-
-			  float.Parse(args[32]), float.Parse(args[33]), float.Parse(args[34]), float.Parse(args[35]), float.Parse(args[36]), float.Parse(args[37]),
-			  float.Parse(args[38]), float.Parse(args[39]), float.Parse(args[40]), float.Parse(args[41]), float.Parse(args[42]), float.Parse(args[43]));
-			AbstractAgent player2 = new TycheAgentCompetition();
+			AbstractAgent player2 = new ParametricGreedyAgent("0.569460712743#0.958111820041#0.0689492467097#0.0#0.843573987219#0.700225423688#0.907680353441#0.0#0.993682660717#" +
+				"1.0#0.640753949511#0.992872512338#0.92870036875#0.168100484322#0.870080107454#0.0#0.42897762808#1.0#0.0#0.583884736646#0.0");
+			//AbstractAgent player2 = new TycheAgentCompetition(1.0f);
+			
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:true);
 
 			Console.WriteLine("PlayGame");
-
+			
 			gameHandler.PlayGames(1);
 			GameStats gameStats = gameHandler.getGameStats();
 
@@ -65,6 +74,26 @@ namespace SabberStoneCoreAi
 
 			Console.WriteLine("Test successful");
 			Console.ReadLine();
+
+			// ==========================================================================================
+			// ==========================================================================================
+			// ==========================================================================================
+	/*		AbstractAgent MCTSAgent = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 10, "UCB1Heuristic", 10, "GreedyPolicy", 1.0, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.3f, 0.15f, 0.9f, 0.3f, 0.05f, 0.3f, 0.7f, 0.8f, 0.5f, 0.4f, 0.5f);
+
+			AbstractAgent GreedyAgent = new ParametricGreedyAgent("0.569460712743#0.958111820041#0.0689492467097#0.0#0.843573987219#0.700225423688#0.907680353441#0.0#0.993682660717#" +
+				"1.0#0.640753949511#0.992872512338#0.92870036875#0.168100484322#0.870080107454#0.0#0.42897762808#1.0#0.0#0.583884736646#0.0");
+			AbstractAgent TycheAgent = new TycheAgentCompetition(0.01f);
+
+			List<AbstractAgent> agents = new List<AbstractAgent>{ MCTSAgent, GreedyAgent, TycheAgent };
+
+			DeckManager manager = new DeckManager();
+			List<List<SabberStoneCore.Model.Card>> decks = new List<List<SabberStoneCore.Model.Card>> { manager.AggroShaman, manager.MidRangeHunter, manager.ControlWarrior };
+			List<CardClass> cardClassList = new List<CardClass> { CardClass.SHAMAN, CardClass.HUNTER, CardClass.WARRIOR };
+
+			Tournaments tournament = new Tournaments(true,false,false,false,10,agents,decks,cardClassList);*/
 		}
 	}
 }
@@ -74,15 +103,6 @@ namespace SabberStoneCoreAi
  * -----------------------------
  * -------- PARAMETROS ---------
  * -----------------------------
- * 
- *	Numero de Simulaciones desde una misma iteracion:
- *		Actualmente no se hace pero se podrían hacer más de una simulacion desde el punto actual y cuando se complete ya sigues iterando.
- *
- *
- * =================================
- * ========= COMPLETADOS ===========
- * =================================
- * 
  * 
  * 	EXPLORE_CONSTANT:
  *		Cuanta importancia le da a explorar nuevos caminos sobre el camino que parece más prometedor. [0 - 2]
@@ -109,22 +129,24 @@ namespace SabberStoneCoreAi
  *
  *  Pesos de los campos de la heuristica:
  *		cuanto importa la vida, cuanto importa nosq etc. en paper lo hacen independientemente con un genetico y despues los añaden aqui ya.
+ *		[0.0, 1.0]
  *
  *  SIMULATION_POLICY:
  *		[RandomPolicy, GreedyPolicy]
  *
  *	Numero de hijos que se tienen en cuenta durante la simulacion en cada rama:
  *		Mientras simulas ahora mismo se tienen en cuenta todos los hijos y a esos le haces un random, pues puedes cojer K hijos y solo ha esos le haces
- *		el scoring. Puedes tambien hacerselo a todos
- *		[0.0,1.0]
+ *		el scoring. Puedes tambien hacerselo a todos. Es un porcentaje.
+ *		[0.0, 1.0]
  *		
  * 	Formas de especular:
  *		[BaseEstimation, ValueEstimation]
+ *
+ *	Numero de Simulaciones desde una misma iteracion:
+ *		Permite no tener que volver a seleccionar y expandir para conseguir más datos en cada bajada.
+ *		[1, infinito]
  *		
  */
-
-
-
 
 
 // comentar que el reuse es inviable debido a que los paso de hearthstone no son deterministas entonces al jugar una carta que tenga que hace un efecto
@@ -132,36 +154,7 @@ namespace SabberStoneCoreAi
 
 
 
-
-
-
-// variantes
 /*
- * parametros para hacer bateria de test para buscar los optimos
- * 
- *
- * hacer que se pueda comparar con el evolutionary
- *
- *
- * pensar heuristicas
- *
- *
- * cuantos mas parametros mejor
- *
- *	intentar que los mazos sean iguales con semillas o crear nuevos desactivando el auto
- *
- *	al estimar poner uno dos o 20 parametros para estimar
- *
- *	aparte de los pesos.
- *
- *  profundidad maxima - param
- *
- *	si no quieres que llegue al final inventa parametro con conocimiento del juego para estimar si ganas o pierdes dejandolo como 0. algo 1  <=
- *	aunqu si llega al final tiene que ser 0 o 1
- *
- * args
- *
- *
  *	=================================================================================
  *	Concepto teorico:
  *		Porque cojones vas a priorizar explorar por donde el jugador 2 tiende a perder, no es realista creer que el jugador 2 va a elegir
