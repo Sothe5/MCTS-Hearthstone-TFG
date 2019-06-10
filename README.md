@@ -2,7 +2,8 @@
 All the code belongs to this repository https://github.com/ADockhorn/HearthstoneAICompetition but:
 
   - All the code inside the folder MCTS-Hearthstone-TFG/core-extensions/SabberStoneCoreAi/src/Agent/AlvaroMCTS which is mine
-  - And the code inside the folder MCTS-Hearthstone-TFG/core-extensions/SabberStoneCoreAi/src/Agent/TycheAgent who's owner is Kai Bornemann
+  - The file MCTS-Hearthstone-TFG/core-extensions/SabberStoneCoreAi/src/Agent/AlvaroMCTS/ParametricGreedyAgent.cs whose owner is Pablo         Garcia-Sanchez
+  - And the code inside the folder MCTS-Hearthstone-TFG/core-extensions/SabberStoneCoreAi/src/Agent/TycheAgent whose owner is Kai Bornemann
 
 
   This repository is built to test and analyze the MCTS algorithm in the Hearthstone enviroment.

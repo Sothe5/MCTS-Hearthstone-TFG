@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using SabberStoneCore.Enums;
@@ -72,6 +72,14 @@ namespace SabberStoneCoreAi.POGame
 				Console.WriteLine("No games played yet. Use Gamehandler.PlayGame() to add games.");
 			}
 			
+		}
+
+		public int Turns
+		{
+			get
+			{
+				return this.turns;
+			}
 		}
 
 		public int GamesPlayed

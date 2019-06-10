@@ -15,7 +15,7 @@ namespace SabberStoneCoreAi
 
 		private static void Main(string[] args)
 		{
-			Console.WriteLine("Setup gameConfig");
+			/*Console.WriteLine("Setup gameConfig");
 
 			GameConfig gameConfig = new GameConfig
 			{
@@ -50,7 +50,7 @@ namespace SabberStoneCoreAi
 			 * Argument style if used in Visual Studio environment
 			 * 
 			 * 2 1000 MaxVictories 1.5 UCB1Heuristic 10 GreedyPolicy 0.7 BaseEstimation 2 0.569460712743 0.958111820041 0.0689492467097 0.0 0.843573987219 0.700225423688 0.907680353441 0.0 0.993682660717 1.0 0.640753949511 0.992872512338 0.92870036875 0.168100484322 0.870080107454 0.0 0.42897762808 1.0 0.0 0.583884736646 0.0 0.9 0.3 0.15 0.9 0.3 0.05 0.3 0.7 0.8 0.5 0.4 0.5
-			 */
+			 *
 
 
 			AbstractAgent player1 = new AlvaroAgent(2, 1000, "MaxVictoriesOverVisited", 10, "UCB1Heuristic", 10, "GreedyPolicy", 0.7, "BaseEstimation", 1,
@@ -74,26 +74,49 @@ namespace SabberStoneCoreAi
 
 			Console.WriteLine("Test successful");
 			Console.ReadLine();
+			*/
+			// ==========================================================================================
+			// ==========================================================================================
+			// ==========================================================================================
 
-			// ==========================================================================================
-			// ==========================================================================================
-			// ==========================================================================================
-	/*		AbstractAgent MCTSAgent = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 10, "UCB1Heuristic", 10, "GreedyPolicy", 1.0, "BaseEstimation", 1,
+			/*AbstractAgent MCTSAgent = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 0.5, "UCB1", 10, "GreedyPolicy", 1.0, "BaseEstimation", 1,
 				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
 				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
-				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.3f, 0.15f, 0.9f, 0.3f, 0.05f, 0.3f, 0.7f, 0.8f, 0.5f, 0.4f, 0.5f);
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.2f, 0.2f, 0.8f, 0.4f, 0.005f, 0.3f, 0.4f, 0.8f, 0.5f, 0.4f, 0.5f);
+			*/
+			AbstractAgent MCTSAgent = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 10, "UCB1", 10, "GreedyPolicy", 1.0, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.2f, 0.2f, 0.9f, 0.3f, 0.02f, 0.3f, 0.4f, 0.8f, 0.5f, 0.4f, 0.5f);
+
+			AbstractAgent MCTSAgent2 = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 1, "UCB1", 8, "RandomPolicy", 1.0, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.2f, 0.05f, 0.9f, 0.3f, 0.02f, 0.3f, 0.4f, 0.8f, 0.5f, 0.4f, 0.5f);
+			/*
+			AbstractAgent MCTSAgent2 = new AlvaroAgent(2, 10, "MaxVictoriesOverVisited", 1, "UCB1", 8, "RandomPolicy", 1.0, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.2f, 0.2f, 0.8f, 0.4f, 0.005f, 0.3f, 0.4f, 0.8f, 0.5f, 0.4f, 0.5f);
+			 */
+
+			AbstractAgent MCTSAgent3 = new AlvaroAgent(2, 10, "MaxVictories", 2, "UCB1Heuristic", 5, "GreedyPolicy", 1.0, "BaseEstimation", 1,
+				"0.569460712743", "0.958111820041", "0.0689492467097", "0.0", "0.843573987219", "0.700225423688", "0.907680353441", "0.0",
+				"0.993682660717", "1.0", "0.640753949511", "0.992872512338", "0.92870036875", "0.168100484322", "0.870080107454",
+				"0.0", "0.42897762808", "1.0", "0.0", "0.583884736646", "0.0", 0.9f, 0.3f, 0.05f, 0.7f, 0.5f, 0.05f, 0.3f, 0.7f, 0.8f, 0.5f, 0.4f, 0.5f);
 
 			AbstractAgent GreedyAgent = new ParametricGreedyAgent("0.569460712743#0.958111820041#0.0689492467097#0.0#0.843573987219#0.700225423688#0.907680353441#0.0#0.993682660717#" +
 				"1.0#0.640753949511#0.992872512338#0.92870036875#0.168100484322#0.870080107454#0.0#0.42897762808#1.0#0.0#0.583884736646#0.0");
 			AbstractAgent TycheAgent = new TycheAgentCompetition(0.01f);
 
-			List<AbstractAgent> agents = new List<AbstractAgent>{ MCTSAgent, GreedyAgent, TycheAgent };
+			List<AbstractAgent> agents = new List<AbstractAgent>{ MCTSAgent, GreedyAgent, TycheAgent, MCTSAgent2, MCTSAgent3};
+			//List<AbstractAgent> agents = new List<AbstractAgent>{ MCTSAgent, GreedyAgent};
 
 			DeckManager manager = new DeckManager();
 			List<List<SabberStoneCore.Model.Card>> decks = new List<List<SabberStoneCore.Model.Card>> { manager.AggroShaman, manager.MidRangeHunter, manager.ControlWarrior };
 			List<CardClass> cardClassList = new List<CardClass> { CardClass.SHAMAN, CardClass.HUNTER, CardClass.WARRIOR };
 
-			Tournaments tournament = new Tournaments(true,false,false,false,10,agents,decks,cardClassList);*/
+			Tournaments tournament = new Tournaments(true,true,true,true,20,agents,decks,cardClassList);
 		}
 	}
 }

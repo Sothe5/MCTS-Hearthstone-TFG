@@ -126,6 +126,8 @@ namespace SabberStoneCoreAi.POGame
 			foreach (PlayerTask task in tasksToSimulate)
 			{
 				Game clone = this.origGame.Clone();
+
+				
 				try
 				{
 					clone.Process(task);
@@ -133,8 +135,8 @@ namespace SabberStoneCoreAi.POGame
 				} catch (Exception)
 				{
 					simulated.Add(task, null);
-				}
-				
+				} 
+
 			}
 			return simulated;
 
@@ -231,6 +233,13 @@ namespace SabberStoneCoreAi.POGame
 			}
 		}
 
+
+		/// <summary>
+		/// Gets or sets the controller delegating the current turn.
+		/// </summary>
+		/// <value><see cref="Controller"/></value>
+		public Controller CurrentPlayer => game.CurrentPlayer;
+		/*
 		/// <summary>
 		/// Gets or sets the controller delegating the current turn.
 		/// </summary>
@@ -246,7 +255,7 @@ namespace SabberStoneCoreAi.POGame
 					? game.Player1
 					: game.Player2;
 			}
-		}
+		}*/
 
 		/// <summary>
 		/// Gets the opponent controller of <see cref="CurrentPlayer"/>.
