@@ -79,14 +79,17 @@ namespace SabberStoneCoreAi.Tournament
 			if (stage1)
 			{
 				totalGamesPlayed += OneDeckStage(nLeagues, 0);
+				Console.WriteLine("\n" + ((stopwatch.ElapsedMilliseconds / 1000.0) / 60.0));
 			}
 			if (stage2)
 			{
 				totalGamesPlayed += OneDeckStage(nLeagues, 1);
+				Console.WriteLine("\n" + ((stopwatch.ElapsedMilliseconds / 1000.0) / 60.0));
 			}
 			if (stage3)
 			{
 				totalGamesPlayed += OneDeckStage(nLeagues, 2);
+				Console.WriteLine("\n" + ((stopwatch.ElapsedMilliseconds / 1000.0) / 60.0));
 			}
 			if (stage4)
 			{
@@ -388,18 +391,25 @@ namespace SabberStoneCoreAi.Tournament
 		{
 			if (agent.agentId == 0)
 			{
-				return "MCTS1";
+				return "Greedy";
 			} else if (agent.agentId == 1)
 			{
-				return "Greedy";
-			} else if (agent.agentId == 2) {
 				return "Tyche";
+			} else if (agent.agentId == 2) {
+
+				return "MCTS1";
 			} else if (agent.agentId == 3)
 			{
 				return "MCTS2";
 			} else if (agent.agentId == 4)
 			{
 				return "MCTS3";
+			} else if (agent.agentId == 5)
+			{
+				return "MCTS4";
+			} else if (agent.agentId == 6)
+			{
+				return "MCTS5";
 			} else
 			{
 				return agent.agentAI.ToString();

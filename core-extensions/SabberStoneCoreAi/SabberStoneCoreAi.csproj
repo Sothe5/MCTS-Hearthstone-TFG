@@ -4,6 +4,14 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="newtonsoft\**" />
+    <Compile Remove="src\Agent\PredatorMCTS\**" />
+    <EmbeddedResource Remove="newtonsoft\**" />
+    <EmbeddedResource Remove="src\Agent\PredatorMCTS\**" />
+    <None Remove="newtonsoft\**" />
+    <None Remove="src\Agent\PredatorMCTS\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\SabberStoneCore\SabberStoneCore.csproj" />
   </ItemGroup>
 </Project>

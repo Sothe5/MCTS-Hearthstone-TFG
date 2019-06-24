@@ -103,7 +103,6 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			double score = 0;
 			foreach (Node child in root.children)
 			{
-				//Console.WriteLine(child.task + ", " + child.totalValue+", "+ child.timesVisited);
 				score = child.totalValue/ (float)child.timesVisited;
 				if (score >= best)
 				{

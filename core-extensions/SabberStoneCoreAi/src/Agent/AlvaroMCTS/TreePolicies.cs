@@ -8,7 +8,6 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 {
 	class TreePolicies
 	{
-
 		public static double selectTreePolicy(string treePolicy, Node node, int iterations, double exploreConstant, ref POGame.POGame poGame,
 			double scoreImportance, ParametricGreedyAgent greedyAgent)
 		{
@@ -46,11 +45,6 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			return value;
 		}
 
-		// PROBLEMAS: falta los pesos que parece que hay que llamar a un metodo "setAgentWeights()". que definen la importancia de cada cosa.
-		// que podrian ser parametros del ejercicio o pedidos a cotutor.
-		// de todos modo tambien necesito pesos para el estado global dado un solo poGame que tampoco se si inventarme o darlo como parametros.
-
-		// heuristic once
 		public static double ucb1Heuristic(Node node, int iterations, double EXPLORE_CONSTANT, ref POGame.POGame poGame, double SCORE_IMPORTANCE, ParametricGreedyAgent greedyAgent)
 		{
 			double value;

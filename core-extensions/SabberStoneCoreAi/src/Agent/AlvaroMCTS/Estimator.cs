@@ -15,6 +15,7 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		private static float DECK_REMAINING_IMPORTANCE = 0;
 		private static float MANA_IMPORTANCE = 0;
 		private static float SECRET_IMPORTANCE = 0;
+		private static float OVERLOAD_IMPORTANCE = 0;
 		private static float M_HAS_CHARGE = 0;
 		private static float M_HAS_DEAHTRATTLE = 0;
 		private static float M_HAS_DIVINE_SHIELD = 0;
@@ -35,11 +36,14 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 
 			switch (estimationMode)
 			{
-				case "BaseEstimation":
-					score = baseEstimation(poGame);
+				case "LinearEstimation":
+					score = linearEstimation(poGame);
 					break;
 				case "ValueEstimation":
 					score = valueEstimation(poGame);
+					break;
+				case "GradualEstimation":
+					score = gradualEstimation(poGame);
 					break;
 				default:
 					score = 0;
@@ -50,7 +54,7 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		}
 
 		static public void setWeights(float weaponAttack, float weaponDurability, float health, float boardStats, float handSize, float deckRemaining,
-			float mana, float secret, float minionCost, float secretCost, float cardCost, float weaponCost, float M_HAS_CHARGE, float M_HAS_DEAHTRATTLE,
+			float mana, float secret, float overload, float minionCost, float secretCost, float cardCost, float weaponCost, float M_HAS_CHARGE, float M_HAS_DEAHTRATTLE,
 			float M_HAS_DIVINE_SHIELD, float M_HAS_INSPIRE, float M_HAS_LIFE_STEAL, float M_HAS_TAUNT, float M_HAS_WINDFURY)
 		{
 			WEAPON_ATTACK_IMPORTANCE = weaponAttack;
@@ -61,6 +65,7 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			DECK_REMAINING_IMPORTANCE = deckRemaining;
 			MANA_IMPORTANCE = mana;
 			SECRET_IMPORTANCE = secret;
+			OVERLOAD_IMPORTANCE = overload;
 
 			MINION_COST_IMPORTANCE = minionCost;
 			SECRET_COST_IMPORTANCE = secretCost;
@@ -68,12 +73,12 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 			WEAPON_COST_IMPORTANCE = weaponCost;
 		}	
 
-		static private float baseEstimation(POGame.POGame poGame)
+		static private float linearEstimation(POGame.POGame poGame)
 		{
 			float finalScore = 0.5f;
-
-			float score1 = calculateScorePlayer(poGame.CurrentOpponent);
-			float score2 = calculateScorePlayer(poGame.CurrentPlayer);
+			
+			float score1 = calculateScorePlayer(poGame.CurrentPlayer);
+			float score2 = calculateScorePlayer(poGame.CurrentOpponent);
 
 			finalScore = score1 - score2;
 			finalScore = finalScore / Math.Max(score1, score2);
@@ -110,13 +115,64 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 				 weaponQuality = player.Hero.Weapon.AttackDamage * WEAPON_ATTACK_IMPORTANCE + player.Hero.Weapon.Durability * WEAPON_DURABILITY_IMPORTANCE;
 			
 			score = player.Hero.Health * HEALTH_IMPORTANCE + player.Hero.Armor * HEALTH_IMPORTANCE + weaponQuality + statsOnBoard * BOARD_STATS_IMPORTANCE + player.HandZone.Count * HAND_SIZE_IMPORTANCE
-				+ player.DeckZone.Count * DECK_REMAINING_IMPORTANCE + player.BaseMana * MANA_IMPORTANCE + player.SecretZone.Count * SECRET_IMPORTANCE;
+				+ player.DeckZone.Count * DECK_REMAINING_IMPORTANCE + player.BaseMana * MANA_IMPORTANCE + player.SecretZone.Count * SECRET_IMPORTANCE - player.OverloadOwed * OVERLOAD_IMPORTANCE;
 
-			if (score == 0)
+			if (score <= 0)
 				return 0.0001f;
 
 			return score;
 		}
+
+		static private float gradualEstimation(POGame.POGame poGame)
+		{
+			float finalScore = 0.5f;
+
+			float score1 = calculateScorePlayerGradual(poGame.CurrentPlayer);
+			float score2 = calculateScorePlayerGradual(poGame.CurrentOpponent);
+
+			finalScore = score1 - score2;
+			finalScore = finalScore / Math.Max(score1, score2);
+			finalScore /= 2;
+			finalScore += 0.5f;
+			return finalScore;
+		}
+
+		static private float calculateScorePlayerGradual(Controller player)
+		{
+			float score = 0;
+			float statsOnBoard = 0;
+			foreach (Minion m in player.BoardZone.GetAll())
+			{
+				statsOnBoard += m.Health + m.AttackDamage;
+				if (m.HasCharge)
+					score = statsOnBoard + M_HAS_CHARGE;
+				if (m.HasDeathrattle)
+					score = statsOnBoard + M_HAS_DEAHTRATTLE;
+				if (m.HasDivineShield)
+					score = statsOnBoard + M_HAS_DIVINE_SHIELD;
+				if (m.HasInspire)
+					score = statsOnBoard + M_HAS_INSPIRE;
+				if (m.HasLifeSteal)
+					score = statsOnBoard + M_HAS_LIFE_STEAL;
+				if (m.HasTaunt)
+					score = statsOnBoard + M_HAS_TAUNT;
+				if (m.HasWindfury)
+					score = statsOnBoard + M_HAS_WINDFURY;
+			}
+
+			float weaponQuality = 0;
+			if (player.Hero.Weapon != null)
+				weaponQuality = player.Hero.Weapon.AttackDamage * WEAPON_ATTACK_IMPORTANCE + player.Hero.Weapon.Durability * WEAPON_DURABILITY_IMPORTANCE;
+
+			score = (float)Math.Sqrt(player.Hero.Health) * HEALTH_IMPORTANCE + (float)Math.Sqrt(player.Hero.Armor) * 2 * HEALTH_IMPORTANCE + weaponQuality + statsOnBoard * BOARD_STATS_IMPORTANCE + (float)Math.Sqrt(player.HandZone.Count) * HAND_SIZE_IMPORTANCE
+				+ (float)Math.Sqrt(player.DeckZone.Count) * DECK_REMAINING_IMPORTANCE + player.BaseMana * MANA_IMPORTANCE + player.SecretZone.Count * SECRET_IMPORTANCE - player.OverloadOwed * OVERLOAD_IMPORTANCE;
+
+			if (score <= 0)
+				return 0.0001f;
+
+			return score;
+		}
+
 
 		static private float valueEstimation(POGame.POGame poGame)
 		{
@@ -162,6 +218,3 @@ namespace SabberStoneCoreAi.src.Agent.AlvaroMCTS
 		}
 	}
 }
-
-
-// relacion value-tempo
